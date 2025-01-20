@@ -14,10 +14,9 @@ import logging
 import advice
 import chat
 
-# Логирование
+
 logging.basicConfig(level=logging.INFO)
 
-# Инициализация бота и диспетчера
 TOKEN = "TOKEN"
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())
@@ -118,6 +117,7 @@ async def start_command(message: types.Message, state: FSMContext):
     else:
         await message.answer("Добро пожаловать! Как вас зовут?", reply_markup=types.ReplyKeyboardRemove())
         await state.set_state(RegistrationForm.name)
+
 
 # FSM: ввод имени
 @dp.message(RegistrationForm.name)
@@ -221,7 +221,7 @@ async def send_reminders():
             async for row in cursor:
                 await bot.send_message(row[0], "Напоминание: Сократите использование пластика и сортируйте мусор!")
 
-
+# неопознанное сообщение
 @dp.message(F.text)
 async def unknown_message(message: types.Message, state: FSMContext):
     current_state = await state.get_state()
@@ -244,7 +244,6 @@ async def unknown_message(message: types.Message, state: FSMContext):
 
 
 async def main():
-    # Инициализация БД
     await init_db()
 
     # Настройка планировщика
@@ -252,7 +251,6 @@ async def main():
     scheduler.add_job(send_reminders, "interval", hours=6)
     scheduler.start()
 
-    # Запуск бота
     print("Бот запущен...")
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
